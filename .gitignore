@@ -1,0 +1,15 @@
+.idea/
+.vscode/
+node_modules/
+npm-debug.log
+.env*
+logs/
+config/default.json
+test/*.html
+d
+uploads/
+test/.*
+test/*.pdf
+test/*.csv
+media/
+.env

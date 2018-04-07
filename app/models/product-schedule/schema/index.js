@@ -9,23 +9,11 @@ const DEFINITION_OBJECT = {
         primaryKey: true,
         autoIncrement: true,
     },
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    dietId: {
+    productId: {
         type: DataTypes.BIGINT,
         allowNull: false,
     },
-    fats: {
-        type: DataTypes.BIGINT,
-        allowNull: false,
-    },
-    proteins: {
-        type: DataTypes.BIGINT,
-        allowNull: false,
-    },
-    carbohydrates: {
+    scheduleId: {
         type: DataTypes.BIGINT,
         allowNull: false,
     },

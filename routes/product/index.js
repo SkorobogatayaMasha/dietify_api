@@ -25,5 +25,16 @@ router.get('/',
         }
     });
 
+router.get('/menu',
+    async (req, res) => {
+        try {
+            const result = await ProductCtrl.menu(req.token.userId);
+
+            res.status(HttpStatus.OK).json(result);
+        } catch (err) {
+            res.status(HttpStatus.BAD_REQUEST).json(err);
+        }
+    });
+
 
 module.exports = router;

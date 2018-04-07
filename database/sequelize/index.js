@@ -14,7 +14,7 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, proces
     charset: 'utf8',
     collate: 'utf8_general_ci',
   },
-  logging: true,
+  logging: false,
 });
 
 module.exports = sequelize;

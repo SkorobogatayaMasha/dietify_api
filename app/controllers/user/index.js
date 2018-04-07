@@ -1,10 +1,10 @@
 const _ = require('lodash');
 const passwordHash = require('password-hash');
 const jwt = require('jsonwebtoken');
-const moment = require('moment');
-const sequelize = require('../../../database/sequelize');
 
+const sequelize = require('../../../database/sequelize');
 const models = require('../../models');
+const CalorieService = require('../../services/calorie');
 
 const UserCtrl = {
     async signUp(user) {
@@ -53,36 +53,6 @@ const UserCtrl = {
         return userJSON;
     },
 
-    async getCalorie(userId) {
-        const user = await models.UserModel.findById(userId);
-        const userJSON = user.toJSON();
-        const bx = this.calculateBX(userJSON);
-
-        const dietCharacteristics = models.UserModel.DIET_CHARACTERISTICS[userJSON.dietId];
-
-        return {
-            dietCharacteristics,
-            calorie: {
-                total: this.calculateCalorie(userJSON, bx),
-                used: 0,
-            },
-            dashboard: {
-                proteins: {
-                    total: 100,
-                    used: 0,
-                },
-                fats: {
-                    total: 100,
-                    used: 0,
-                },
-                carbohydrates: {
-                    total: 100,
-                    used: 0,
-                },
-            }
-        };
-    },
-
     async updateWeight(userId, weight) {
         await sequelize.transaction(async (t) => {
             await models.UserModel.update({ weight }, { where: { id: userId }, transaction: t, hooks: false });
@@ -101,29 +71,9 @@ const UserCtrl = {
         return models.UserModel.update({ password }, { where: { email: content.email }, hooks: false })
     },
 
-    calculateBX(user) {
-        const { weight, growth, dateOfBirth, gender } = user;
-        const age = moment.utc().diff(moment(dateOfBirth), 'years');
-        const isMen = gender === models.UserModel.GENDER_TYPE.MEN;
-
-        return (10 * weight) + (6.25 * growth) - (5 * age) + (isMen ? 5 : -161);
-    },
-
-    calculateCalorie(user, bx) {
-        switch (user.lifestyle) {
-            case models.UserModel.LIFESTYLE.VERY_HIGH_ACTIVITY:
-                return bx * 1.9;
-            case models.UserModel.LIFESTYLE.HIGH_ACTIVITY:
-                return bx * 1.725;
-            case models.UserModel.LIFESTYLE.AVERAGE_ACTIVITY:
-                return bx * 1.55;
-            case models.UserModel.LIFESTYLE.SLIGHT_ACTIVITY:
-                return bx * 1.375;
-            case models.UserModel.LIFESTYLE.PASSIVE:
-            default:
-                return bx * 1.2;
-        }
-    },
+    getCalorie(userId) {
+        return CalorieService.getCalorie(userId);
+    }
 };
 
 module.exports = UserCtrl;

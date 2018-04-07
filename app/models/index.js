@@ -3,9 +3,9 @@ const _ = require('lodash');
 const sequelize = require('../../database/sequelize');
 
 const models = {
-  CalorieHistoryModel: require('./calorie-history'),
   ProductModel: require('./product'),
   ProductInstanceModel: require('./product-instance'),
+  ProductScheduleModel: require('./product-schedule'),
   UserModel: require('./user'),
   WeightHistoryModel: require('./weight-history'),
 };

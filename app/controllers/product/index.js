@@ -48,8 +48,6 @@ const ProductCtrl = {
         });
 
         const diet = models.UserModel.DIET_CHARACTERISTICS[user.dietId];
-        // console.log(diet);
-
         const result = {
             proteins: 0,
             fats: 0,
@@ -63,8 +61,96 @@ const ProductCtrl = {
 
         const calorie = await CalorieService.getCalorie(userId);
 
-        console.log(result);
-        console.log(calorie);
+        const categories = {};
+        Object.keys(calorie.dashboard).forEach((key, index) => {
+            categories[`k${index}`] = calorie.dashboard[key].used * 100 / calorie.dashboard[key].total;
+        });
+
+        const matrix = [];
+        Object.values(categories).forEach(categoryA => {
+            const array = [];
+            Object.values(categories).forEach(categoryB => {
+                if (categoryA === categoryB) {
+                    array.push(1);
+                } else if (categoryA > categoryB) {
+                    const x = ((categoryA - categoryB) * 100) / categoryA;
+                    if (x <= 25) {
+                        array.push(3);
+                    } else if (x <= 50) {
+                        array.push(5);
+                    } else if (x <= 75) {
+                        array.push(7);
+                    } else {
+                        array.push(9);
+                    }
+                } else {
+                    const x = ((categoryB - categoryA) * 100) / categoryB;
+                    if (x <= 25) {
+                        array.push(1/3);
+                    } else if (x <= 50) {
+                        array.push(1/5);
+                    } else if (x <= 75) {
+                        array.push(1/7);
+                    } else {
+                        array.push(1/9);
+                    }
+                }
+            });
+
+            matrix.push(array);
+        });
+
+        const avgGem = {};
+        matrix.forEach((array, index) => {
+            array.forEach((item) => {
+                if (!avgGem[`k${index}`]) {
+                    avgGem[`k${index}`] = 1;
+                }
+                avgGem[`k${index}`] *= item;
+            });
+            avgGem[`k${index}`] = Math.cbrt(avgGem[`k${index}`]);
+        });
+
+        let total = 0;
+        Object.values(avgGem).forEach(value => total += value);
+
+        const h = {};
+        Object.values(avgGem).forEach((item, index) => {
+            h[`k${index}`] = item / total;
+        });
+
+        let checkH = 0;
+        Object.values(h).forEach(item => checkH += item);
+
+        const categoryAvg = {};
+        matrix.forEach(array => {
+            array.forEach((item, index) => {
+                if (!categoryAvg[`k${index}`]) {
+                    categoryAvg[`k${index}`] = 0;
+                }
+                categoryAvg[`k${index}`] += item;
+            });
+        });
+
+        const lambda = {};
+        Object.values(categoryAvg).forEach((item, index) => {
+            lambda[`k${index}`] = h[`k${index}`] * categoryAvg[`k${index}`];
+        });
+
+        let lambdaMax = 0;
+        Object.values(lambda).forEach(item => lambdaMax += item);
+
+        const n = Object.values(lambda).length;
+        const is = (lambdaMax - n) / (n - 1);
+
+        const ss = 0.58; // constant value
+        const os = is / ss;
+
+        console.log(os);
+
+
+        // console.log(categories);
+        // console.log(calorie);
 
         return productInstances;
     },

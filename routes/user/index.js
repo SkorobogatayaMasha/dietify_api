@@ -79,4 +79,15 @@ router.put('/weight',
     }
   });
 
+router.post('/reset-password',
+    async (req, res) => {
+        try {
+            await UserCtrl.resetPassword(req.body);
+
+            res.status(HttpStatus.OK).send();
+        } catch (err) {
+            res.status(HttpStatus.BAD_REQUEST).json(err);
+        }
+    });
+
 module.exports = router;

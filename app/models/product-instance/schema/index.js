@@ -13,6 +13,10 @@ const DEFINITION_OBJECT = {
     type: DataTypes.BIGINT,
     allowNull: false,
   },
+  count: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+  },
   userId: {
     type: DataTypes.BIGINT,
     allowNull: false,

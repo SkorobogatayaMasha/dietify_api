@@ -1,3 +1,3 @@
 module.exports = Object.freeze({
-  MODEL: 'product-instance',
+  MODEL: 'product_instance',
 });

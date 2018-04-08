@@ -25,10 +25,11 @@ router.get('/',
         }
     });
 
-router.get('/menu',
+router.get('/menu/:scheduleId',
     async (req, res) => {
         try {
-            const result = await ProductCtrl.menu(req.token.userId);
+            const scheduleId = req.params.scheduleId;
+            const result = await ProductCtrl.menu(req.token.userId, scheduleId);
 
             res.status(HttpStatus.OK).json(result);
         } catch (err) {

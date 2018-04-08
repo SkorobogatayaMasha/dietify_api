@@ -24,15 +24,20 @@ const ProductCtrl = {
 
     async menu(userId, scheduleId) {
         const user = await models.UserModel.findById(userId);
-        // const products = await models.ProductModel.findAll({
-        //     include: {
-        //         model: models.ProductScheduleModel,
-        //         required: true,
-        //         where: {
-        //             scheduleId,
-        //         }
-        //     },
-        // });
+        const products = await models.ProductModel.findAll({
+            include: {
+                attributes: [],
+                model: models.ProductScheduleModel,
+                required: true,
+                where: {
+                    scheduleId,
+                },
+            },
+            where: {
+                dietId: user.dietId,
+            },
+            raw: true,
+        });
 
         const productInstances = await models.ProductInstanceModel.findAll({
             include: {
@@ -47,7 +52,6 @@ const ProductCtrl = {
             },
         });
 
-        const diet = models.UserModel.DIET_CHARACTERISTICS[user.dietId];
         const result = {
             proteins: 0,
             fats: 0,
@@ -63,7 +67,8 @@ const ProductCtrl = {
 
         const categories = {};
         Object.keys(calorie.dashboard).forEach((key, index) => {
-            categories[`k${index}`] = calorie.dashboard[key].used * 100 / calorie.dashboard[key].total;
+            console.log(key);
+            categories[`k${index}`] = 100 - (calorie.dashboard[key].used * 100 / calorie.dashboard[key].total);
         });
 
         const matrix = [];
@@ -132,27 +137,61 @@ const ProductCtrl = {
             });
         });
 
-        const lambda = {};
+        let categoryAvgSum = 0;
+        Object.values(categoryAvg).forEach(item => categoryAvgSum += item);
+
+        // const lambda = {};
+        // Object.values(categoryAvg).forEach((item, index) => {
+            // lambda[`k${index}`] = h[`k${index}`] * categoryAvg[`k${index}`];
+        // });
+
+        // let lambdaMax = 0;
+        // Object.values(lambda).forEach(item => lambdaMax += item);
+
+        // const n = Object.values(lambda).length;
+        // const is = (lambdaMax - n) / (n - 1);
+
+        // const ss = 0.58; // constant value
+        // const os = is / ss * 100;
+
+        const weightCriteries = {};
         Object.values(categoryAvg).forEach((item, index) => {
-            lambda[`k${index}`] = h[`k${index}`] * categoryAvg[`k${index}`];
+            weightCriteries[`k${index}`] = categoryAvg[`k${index}`] / categoryAvgSum;
         });
 
-        let lambdaMax = 0;
-        Object.values(lambda).forEach(item => lambdaMax += item);
+        const alternatives = [];
+        products.forEach(product => {
+            const array = [];
+            Object.values(weightCriteries).forEach((weightCritery, index) => {
+                switch (index) {
+                    case 0:
+                        array.push({ name: product.name, value: product.proteins });
+                        break;
+                    case 1:
+                        array.push({ name: product.name, value: product.fats });
+                        break;
+                    case 2:
+                        array.push({ name: product.name, value: product.carbohydrates });
+                        break;
+                }
+            });
 
-        const n = Object.values(lambda).length;
-        const is = (lambdaMax - n) / (n - 1);
+            alternatives.push(array);
+        });
 
-        const ss = 0.58; // constant value
-        const os = is / ss;
+        const weightAlternatives = [];
+        alternatives.forEach((array) => {
+            let weightAlternative = 0;
+            let productName = '';
+            array.forEach((item, index) => {
+                weightAlternative += item.value * weightCriteries[`k${index}`];
+                productName = item.name;
+            });
 
-        console.log(os);
+            weightAlternatives.push({ name: productName, value: weightAlternative });
+        });
 
-
-        // console.log(categories);
-        // console.log(calorie);
-
-        return productInstances;
+        return weightAlternatives.sort((a, b) => a.value < b.value ? 1 : -1);
     },
 };
 

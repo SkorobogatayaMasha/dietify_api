@@ -165,13 +165,13 @@ const ProductCtrl = {
             Object.values(weightCriteries).forEach((weightCritery, index) => {
                 switch (index) {
                     case 0:
-                        array.push({ name: product.name, value: product.proteins });
+                        array.push({ ...product, value: product.proteins });
                         break;
                     case 1:
-                        array.push({ name: product.name, value: product.fats });
+                        array.push({ ...product, value: product.fats });
                         break;
                     case 2:
-                        array.push({ name: product.name, value: product.carbohydrates });
+                        array.push({ ...product, value: product.carbohydrates });
                         break;
                 }
             });
@@ -182,13 +182,13 @@ const ProductCtrl = {
         const weightAlternatives = [];
         alternatives.forEach((array) => {
             let weightAlternative = 0;
-            let productName = '';
+            let product = {};
             array.forEach((item, index) => {
                 weightAlternative += item.value * weightCriteries[`k${index}`];
-                productName = item.name;
+                product = item;
             });
 
-            weightAlternatives.push({ name: productName, value: weightAlternative });
+            weightAlternatives.push({ ...product, value: weightAlternative });
         });
 
         return weightAlternatives.sort((a, b) => a.value < b.value ? 1 : -1);

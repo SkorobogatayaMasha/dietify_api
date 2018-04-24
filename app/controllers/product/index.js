@@ -15,10 +15,7 @@ const ProductCtrl = {
 
     async create(payload) {
         const { schedules, ...product } = payload;
-        console.log(schedules);
-
         const productInstance = await models.ProductModel.create(product, { returning: true, raw: true });
-        console.log(productInstance.toJSON());
 
         await Promise.each(schedules, async schedule => {
             console.log(schedule);

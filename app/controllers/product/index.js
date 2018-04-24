@@ -1,3 +1,4 @@
+const Promise = require('bluebird');
 const rp = require('request-promise');
 const moment = require('moment');
 const Op = require('sequelize').Op;
@@ -10,6 +11,24 @@ const ProductCtrl = {
         const res = await rp(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
 
         return JSON.parse(res);
+    },
+
+    async create(payload) {
+        const { schedules, ...product } = payload;
+        console.log(schedules);
+
+        const productInstance = await models.ProductModel.create(product, { returning: true, raw: true });
+        console.log(productInstance.toJSON());
+
+        await Promise.each(schedules, async schedule => {
+            console.log(schedule);
+            await models.ProductScheduleModel.create({
+                productId: productInstance.toJSON().id,
+                scheduleId: schedule,
+            });
+        });
+
+        return productInstance;
     },
 
     listOfFood(userId) {

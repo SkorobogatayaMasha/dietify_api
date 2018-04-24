@@ -25,6 +25,17 @@ router.get('/',
         }
     });
 
+router.post('/',
+    async (req, res) => {
+        try {
+            const result = await ProductCtrl.create(req.body);
+
+            res.status(HttpStatus.OK).json(result);
+        } catch (err) {
+            res.status(HttpStatus.BAD_REQUEST).json(err);
+        }
+    });
+
 router.get('/menu/:scheduleId',
     async (req, res) => {
         try {

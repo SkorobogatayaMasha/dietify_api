@@ -9,8 +9,24 @@ const CalorieService = require('../../services/calorie');
 const ProductCtrl = {
     async getBarcodeInfo(barcode) {
         const res = await rp(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+        console.log(res);
+        const {
+            product: {
+                nutriments: {
+                    proteins_100g,
+                    fat_100g,
+                    carbohydrates_100g,
+                },
+                product_name,
+            },
+        } = JSON.parse(res);
 
-        return JSON.parse(res);
+        return {
+            fat_100g: +fat_100g,
+            carbohydrates_100g: +carbohydrates_100g,
+            proteins_100g: +proteins_100g,
+            product_name,
+        };
     },
 
     async create(payload) {
